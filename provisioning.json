@@ -1,0 +1,9 @@
+{
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.example.brtprojectt/com.example.brtprojectt.DeviceAdminReceiverImpl",
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "REPLACE_WITH_YOUR_APK_URL",
+    "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM": "REPLACE_WITH_YOUR_APK_CHECKSUM",
+    "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
+    "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
+        "is_provisioned_by_qr": true
+    }
+}
