@@ -47,9 +47,16 @@ class MainActivity : FlutterActivity() {
                 }
                 "isProvisionedViaQR" -> {
                     try {
-                        val intent = intent
-                        val extras = intent?.getBundleExtra(DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE)
-                        val isQr = extras?.getBoolean("is_provisioned_by_qr") ?: false
+                        // First check SharedPreferences for persistent status
+                        val prefs = getSharedPreferences("admin_prefs", Context.MODE_PRIVATE)
+                        var isQr = prefs.getBoolean("is_provisioned_by_qr", false)
+                        
+                        // Fallback to initial intent if prefs not found yet
+                        if (!isQr) {
+                            val extras = intent?.getBundleExtra(DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE)
+                            isQr = extras?.getBoolean("is_provisioned_by_qr") ?: false
+                        }
+                        
                         result.success(isQr)
                     } catch (e: Exception) {
                         result.success(false)
@@ -81,16 +88,27 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 "setFRPAccount" -> {
-                    val accountEmail = call.argument<String>("email") ?: ""
+                    val accountId = call.argument<String>("email") ?: ""
                     try {
                         if (dpm.isDeviceOwnerApp(packageName)) {
-                            // Setting the FRP account ensure that after a hard reset, 
-                            // the device is locked to this account.
-                            // Note: This requires the specific account ID (numeric) for full implementation
-                            // but we are setting the foundation here.
+                            // 1. Legacy GMS Approach (Requires Numeric ID for older devices like Vivo Y81)
                             val bundle = android.os.Bundle()
-                            bundle.putStringArray("factoryResetProtectionAccounts", arrayOf(accountEmail))
+                            bundle.putStringArray("factoryResetProtectionAccounts", arrayOf(accountId))
                             dpm.setApplicationRestrictions(adminComponent, "com.google.android.gms", bundle)
+
+                            // 2. Modern Android Enterprise Approach (API 30+)
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                                val policy = android.app.admin.FactoryResetProtectionPolicy.Builder()
+                                    .setFactoryResetProtectionAccounts(listOf(accountId))
+                                    .setFactoryResetProtectionEnabled(true)
+                                    .build()
+                                dpm.setFactoryResetProtectionPolicy(adminComponent, policy)
+                            }
+                            
+                            // PERSIST state so UI can show it
+                            val prefs = getSharedPreferences("admin_prefs", Context.MODE_PRIVATE)
+                            prefs.edit().putString("frp_account", accountId).apply()
+                            
                             result.success(true)
                         } else {
                             result.error("NOT_DEVICE_OWNER", "App is not device owner", null)
@@ -98,6 +116,10 @@ class MainActivity : FlutterActivity() {
                     } catch (e: Exception) {
                         result.error("ERROR", e.message, null)
                     }
+                }
+                "getFRPAccount" -> {
+                    val prefs = getSharedPreferences("admin_prefs", Context.MODE_PRIVATE)
+                    result.success(prefs.getString("frp_account", null))
                 }
                 else -> {
                     result.notImplemented()

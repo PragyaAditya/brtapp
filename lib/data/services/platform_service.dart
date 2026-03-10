@@ -84,4 +84,14 @@ class PlatformService {
       return false;
     }
   }
+
+  Future<String?> getFRPAccount() async {
+    try {
+      final String? account = await _channel.invokeMethod('getFRPAccount');
+      return account;
+    } on PlatformException catch (e) {
+      debugPrint("Failed to get FRP account: '${e.message}'.");
+      return null;
+    }
+  }
 }

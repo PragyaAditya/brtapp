@@ -23,6 +23,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
     final isBlocked = await isUninstallBlocked();
     final isQr = await _platformService.isProvisionedViaQR();
     final isResetDisabled = await _platformService.isFactoryResetDisabled();
+    final frpAcc = await _platformService.getFRPAccount();
 
     return PolicyStatus(
       isDeviceOwner: isOwner,
@@ -30,6 +31,7 @@ class PolicyRepositoryImpl implements PolicyRepository {
       isPolicyApplied: isOwner && isBlocked,
       isProvisionedViaQR: isQr,
       isFactoryResetDisabled: isResetDisabled,
+      frpAccount: frpAcc,
     );
   }
 

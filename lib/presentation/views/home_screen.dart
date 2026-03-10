@@ -173,11 +173,23 @@ class HomeScreen extends StatelessWidget {
       builder:
           (context) => AlertDialog(
             title: const Text('Set FRP Account'),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'Enter organizational email',
-              ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter 21-digit Google ID',
+                    labelText: 'Google Numeric ID',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Note: On older devices (Vivo/Android 8), you MUST use your 21-digit numeric Google ID, not your email.',
+                  style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                ),
+              ],
             ),
             actions: [
               TextButton(
